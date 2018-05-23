@@ -6,6 +6,7 @@ package models
 
 import (
 	"github.com/volatiletech/sqlboiler/boil"
+	"log"
 	"net/http"
 	{{- range .Imports}}
 	{{.}}
@@ -30,14 +31,30 @@ var Build{{.SingularName}} = func(*{{.SingularName}}, *http.Request) error {
 	return nil
 }
 
+var AfterUpdate{{.SingularName}} = func(boil.Executor, *{{.SingularName}}, *http.Request) error {
+	return nil
+}
+
+var AfterInsert{{.SingularName}} = func(boil.Executor, *{{.SingularName}}, *http.Request) error {
+	return nil
+}
+
+var Rebuild{{.SingularName}}OnFind = func(exec boil.Executor, Obj *{{.SingularName}}) (interface{}, error) {
+	return interface{}(Obj), nil
+}
+
 func FindAndResponse{{.SingularName}}(exec boil.Executor, w http.ResponseWriter, r *http.Request) {
 	var errID, errFind error
-	var Obj = new({{.SingularName}})
+	var obj = new({{.SingularName}})
+	var Obj interface{}
 	var id int64
 
 	id, errID = IDFromURL(r)
 	if errID == nil && id > 0 {
-		Obj, errFind = Find{{.SingularName}}(exec, id)
+		obj, errFind = Find{{.SingularName}}(exec, id)
+		if errFind == nil {
+			Obj, errFind = Rebuild{{.SingularName}}OnFind(exec, obj)
+		}
 	}
 
 	CheckFindAndResponse(w, Obj, id, errID, errFind)
@@ -52,6 +69,7 @@ func UpdateAndResponse{{.SingularName}}(exec boil.Executor, w http.ResponseWrite
 	if errID == nil && id > 0 {
 		Obj, errFind = Find{{.SingularName}}(exec, id)
 		if errFind == nil {
+			ObjIni := *Obj //Una copia
 			errBuild = Obj.BuildFromForm(r)
 			if errBuild == nil {
 				errValidate = Validate{{.SingularName}}(Obj)
@@ -59,6 +77,15 @@ func UpdateAndResponse{{.SingularName}}(exec boil.Executor, w http.ResponseWrite
 					errValidate = Validate{{.SingularName}}OnUpdate(Obj)
 					if errValidate == nil {
 						errUpdate = Obj.Update(exec)
+						if errUpdate == nil {
+							errUpdate = AfterUpdate{{.SingularName}}(exec, Obj, r)
+							if errUpdate != nil {
+								errUpd := ObjIni.Update(exec)
+								if errUpd != nil {
+									log.Println(errUpd)
+								}
+							}
+						}
 					}
 				}
 			}
@@ -79,6 +106,15 @@ func InsertAndResponse{{.SingularName}}(exec boil.Executor, w http.ResponseWrite
 			errValidate = Validate{{.SingularName}}OnInsert(Obj)
 			if errValidate == nil {
 				errInsert = Obj.Insert(exec)
+				if errInsert == nil {
+					errInsert = AfterInsert{{.SingularName}}(exec, Obj, r)
+					if errInsert != nil {
+						errDel := Obj.Delete(exec)
+						if errDel != nil {
+							log.Println(errDel)
+						}
+					}
+				}
 			}
 		}
 	}

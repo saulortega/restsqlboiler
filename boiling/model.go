@@ -86,7 +86,7 @@ func NewModelFromFile(file string) (*Model, error) {
 }
 
 func (m *Model) WriteTo(dir string) error {
-	if m.FileName != "employees" && m.FileName != "dispatches_statuses" && m.FileName != "employee_positions" && !regexp.MustCompile(`^vehicle`).MatchString(m.FileName) && m.FileName != "schedules" && m.FileName != "shifts" && m.FileName != "identification_types" && m.FileName != "service_categories" && m.FileName != "geometry_categories" && m.FileName != "geometry_groups" && m.FileName != "service_types" && m.FileName != "devices" && m.FileName != "geometries" {
+	if m.FileName != "employees" && m.FileName != "dispatches_statuses" && m.FileName != "employee_positions" && !regexp.MustCompile(`^vehicle`).MatchString(m.FileName) && m.FileName != "schedules" && m.FileName != "shifts" && m.FileName != "identification_types" && m.FileName != "service_categories" && m.FileName != "geometry_categories" && m.FileName != "geometry_groups" && m.FileName != "service_types" && m.FileName != "devices" && m.FileName != "geometries" && m.FileName != "dispatches" {
 		return nil // ----------------- pruebas ------------------------------- quitar esto _------------------------------
 	}
 
