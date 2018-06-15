@@ -1,15 +1,17 @@
 
 {{$modelName := .Table.Name | singular | titleCase -}}
+{{- $hasDeletedAt := setInclude "deleted_at" (columnNames .Table.Columns) -}}
 {{- $varNameSingular := .Table.Name | singular | camelCase -}}
 
 func DeleteAndResponse{{$modelName}}(exec boil.Executor, w http.ResponseWriter, r *http.Request) {
-	if in("deleted_at", {{$varNameSingular}}Columns){
+	{{if $hasDeletedAt -}}
 		SoftDeleteAndResponse{{$modelName}}(exec, w, r)
-	} else {
+	{{- else -}}
 		HardDeleteAndResponse{{$modelName}}(exec, w, r)
-	}
+	{{- end -}}
 }
 
+{{if $hasDeletedAt -}}
 func SoftDeleteAndResponse{{$modelName}}(exec boil.Executor, w http.ResponseWriter, r *http.Request) {
 	var Obj = new({{$modelName}})
 	var err error
@@ -27,21 +29,17 @@ func SoftDeleteAndResponse{{$modelName}}(exec boil.Executor, w http.ResponseWrit
 		return
 	}
 
-	// Esto es un poco rebuscado, mejorarlo... ----------------------------------------- pendiente, revisar .tpl -----------------------------------------
-	{{range $column := .Table.Columns -}}
-	{{- if eq (titleCase $column.Name) "DeletedAt" -}}
 	Obj.DeletedAt = null.NewTime(time.Now(), true)
 	err = Obj.Update(exec, "deleted_at")
 	if err != nil {
 		ResponseInternalServerError(w, err, "4872")
 		return
 	}
-	{{end -}}
-	{{end -}}
 
 	w.Header().Set("X-Id", fmt.Sprintf("%v", Obj.ID))
 	w.WriteHeader(http.StatusOK)
 }
+{{- end}}
 
 func HardDeleteAndResponse{{$modelName}}(exec boil.Executor, w http.ResponseWriter, r *http.Request) {
 	var Obj = new({{$modelName}})
