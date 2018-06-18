@@ -201,12 +201,12 @@ class {{$modelName}} {
 
 		{{range .Table.FKeys -}}
 		{{- $txt := txtsFromFKey $dot.Tables $dot.Table . -}}
-		this.{{$txt.ForeignTable.NameGo}}: {},
+		this.{{$txt.ForeignTable.NameGo}} = {}
 		{{end -}}
 
 		{{range .Table.ToManyRelationships -}}
 		{{- $txt := txtsFromToMany $dot.Tables $dot.Table . -}}
-		this.{{$txt.ForeignTable.NamePluralGo}}: [],
+		this.{{$txt.ForeignTable.NamePluralGo}} = []
 		{{end}}
 	}
 
@@ -236,7 +236,7 @@ class {{$modelName}} {
 
 	{{range .Table.FKeys -}}
 	{{- $txt := txtsFromFKey $dot.Tables $dot.Table . -}}
-	get{{$txt.ForeignTable.NameGo}}: function(){
+	get{{$txt.ForeignTable.NameGo}}(){
 		return new Promise( (resolve, reject) => {
 			if(!this.Data.{{.Column}}){
 				if(this.Data.id){
@@ -268,12 +268,12 @@ class {{$modelName}} {
 		//	this.{{$txt.ForeignTable.NameGo}} = res.data
 		//})
 		//return P
-	},
+	}
 	{{end -}}
 
 	{{range .Table.ToManyRelationships -}}
 	{{- $txt := txtsFromToMany $dot.Tables $dot.Table . -}}
-	get{{$txt.ForeignTable.NamePluralGo}}: function(params){
+	get{{$txt.ForeignTable.NamePluralGo}}(params){
 		return new Promise( (resolve, reject) => {
 			if(!this.Data.id){
 				reject()
@@ -300,7 +300,7 @@ class {{$modelName}} {
 		//	this.{{$txt.ForeignTable.NamePluralGo}} = res.data
 		//})
 		//return P
-	},
+	}
 	{{end}}
 
 	{{/* dentro de range :: {{$txt.ForeignTable.Slice}} __ {{$txt.ForeignTable.NameGo}} __ {{$txt.ForeignTable.NamePluralGo}} __ {{$txt.ForeignTable.NameHumanReadable}} __ {{$txt.ForeignTable.ColumnNameGo}} */}}
@@ -328,7 +328,11 @@ var Mixin{{$modelName}} = {
 	data: function () {
 		return {
 			//Resource: '/{{.Table.Name}}',
-			{{$modelName}}: {
+			getting: false,
+			editing: false,
+			creating: false,
+			deleting: false,
+			Data: {
 				{{- range $column := .Table.Columns -}}
 				{{- if eq (titleCase $column.Name) "CreatedAt" "UpdatedAt" "DeletedAt" -}}
 				{{- else}}
@@ -347,49 +351,83 @@ var Mixin{{$modelName}} = {
 			{{end}}
 		}
 	},
+	created: function(){
+		this.$emit('created', true)
+	},
+	mounted: function(){
+		this.$emit('mounted', true)
+	},
+	watch: {
+		'Data.id': function(v){
+			this.$emit('data-id', v)
+		},
+		'getting': function(v){
+			this.$emit('getting', v)
+		},
+		'editing': function(v){
+			this.$emit('editing', v)
+		},
+		'creating': function(v){
+			this.$emit('creating', v)
+		},
+		'deleting': function(v){
+			this.$emit('deleting', v)
+		},
+	},
 	methods: {
 		get: function(id) {
-			//Limpiar antes... pendiente -------------------
+			this.clean()
+			this.getting = true
 			{{$modelName}}.Get(id).then( res => {
 				console.log('get vue ', res)
-				this.{{$modelName}} = res.data
-				this.$emit('get', true, this.{{$modelName}})
+				this.Data = res.data
+				this.getting = false
+				this.$emit('get', true, JSON.parse(JSON.stringify(this.Data)))
 			}).catch( res => {
-				this.$emit('get', false, this.{{$modelName}})
+				this.getting = false
+				this.$emit('get', false, JSON.parse(JSON.stringify(this.Data)))
 			})
 		},
 		edit: function() {
-			{{$modelName}}.Edit(this.{{$modelName}}.id, this.{{$modelName}}).then( res => {
+			this.editing = true
+			{{$modelName}}.Edit(this.Data.id, this.Data).then( res => {
 				console.log('edit vue ', res)
-				this.$emit('edit', true, this.{{$modelName}})
+				this.editing = false
+				this.$emit('edit', true, JSON.parse(JSON.stringify(this.Data)))
 			}).catch( res => {
-				this.$emit('edit', false, this.{{$modelName}})
+				this.editing = false
+				this.$emit('edit', false, JSON.parse(JSON.stringify(this.Data)))
 			})
 		},
 		create: function() {
-			{{$modelName}}.Create(this.{{$modelName}}).then( res => {
+			this.creating = true
+			{{$modelName}}.Create(this.Data).then( res => {
 				console.log('create vue ', res)
-				this.{{$modelName}}.id = 99999999999999 // pendiente extrar el id ------------------
-				this.$emit('create', true, this.{{$modelName}})
-				// -------------- llamar clean ---------------------------
+				this.creating = false
+				this.Data.id = (res.headers['X-Id'] || res.headers['x-id'] || this.Data.id || '')
+				this.$emit('create', true, JSON.parse(JSON.stringify(this.Data)))
 			}).catch( res => {
-				this.$emit('create', false, this.{{$modelName}})
+				this.creating = false
+				this.$emit('create', false, JSON.parse(JSON.stringify(this.Data)))
 			})
 		},
 		delete: function() {
-			{{$modelName}}.Delete(this.{{$modelName}}.id).then( res => {
+			this.deleting = true
+			{{$modelName}}.Delete(this.Data.id).then( res => {
 				console.log('delete vue ', res)
-				this.$emit('delete', true, this.{{$modelName}})
-				// -------------- llamar clean ---------------------------
+				this.deleting = false
+				this.$emit('delete', true, JSON.parse(JSON.stringify(this.Data)))
+				this.clean()
 			}).catch( res => {
-				this.$emit('delete', false, this.{{$modelName}})
+				this.deleting = false
+				this.$emit('delete', false, JSON.parse(JSON.stringify(this.Data)))
 			})
 		},
 		clean: function() {
 			{{- range $column := .Table.Columns -}}
 			{{- if eq (titleCase $column.Name) "CreatedAt" "UpdatedAt" "DeletedAt" -}}
 			{{- else}}
-			this.{{if eq $dot.StructTagCasing "camel"}}{{$column.Name | camelCase}}{{else}}{{$column.Name}}{{end}} = '',
+			this.Data.{{if eq $dot.StructTagCasing "camel"}}{{$column.Name | camelCase}}{{else}}{{$column.Name}}{{end}} = ''
 			{{- end}}
 			{{- end}}
 		},
@@ -397,13 +435,13 @@ var Mixin{{$modelName}} = {
 		{{- $txt := txtsFromFKey $dot.Tables $dot.Table . -}}
 		get{{$txt.ForeignTable.NameGo}}: function(){
 			return new Promise( (resolve, reject) => {
-				if(!this.{{$modelName}}.{{.Column}}){
+				if(!this.Data.{{.Column}}){
 					this.{{$txt.ForeignTable.NameGo}} = {}
 					resolve()
 					return
 				}
 
-				{{$txt.ForeignTable.NameGo}}.Get(this.{{$modelName}}.{{.Column}}).then( res => {
+				{{$txt.ForeignTable.NameGo}}.Get(this.Data.{{.Column}}).then( res => {
 					console.log('resssssssssss sing vue ', res)
 					this.{{$txt.ForeignTable.NameGo}} = res.data
 					resolve()
@@ -411,7 +449,7 @@ var Mixin{{$modelName}} = {
 					reject()
 				})
 			})
-			//if(!this.{{$modelName}}.{{.Column}}){
+			//if(!this.Data.{{.Column}}){
 			//	this.{{$txt.ForeignTable.NameGo}} = {}
 			//	return
 			//}
@@ -422,13 +460,13 @@ var Mixin{{$modelName}} = {
 		{{- $txt := txtsFromToMany $dot.Tables $dot.Table . -}}
 		get{{$txt.ForeignTable.NamePluralGo}}: function(){
 			return new Promise( (resolve, reject) => {
-				if(!this.{{$modelName}}.id){
+				if(!this.Data.id){
 					this.{{$txt.ForeignTable.NamePluralGo}} = []
 					resolve()
 					return
 				}
 
-				{{$txt.ForeignTable.NamePluralGo}}.Get({'{{.ForeignColumn}}': this.{{$modelName}}.id}).then( res => {
+				{{$txt.ForeignTable.NamePluralGo}}.Get({'{{.ForeignColumn}}': this.Data.id}).then( res => {
 					console.log('resssssssssss plur vue ', res)
 					this.{{$txt.ForeignTable.NamePluralGo}} = res.data
 					resolve()
@@ -441,8 +479,18 @@ var Mixin{{$modelName}} = {
 	},
 }
 
-// ------------------ por aquí voy, ya se puede continuar con nueva tabla de maintenance tasks .............. pendiente ---------------------------------
+
+
+var Mixin{{$modelNamePlural}} = {
+	// -------- quizás no...
+}
+
+
+
 
 */
 
 {{/* {{$txt.ForeignTable.Slice}} __ {{$txt.ForeignTable.NameGo}} __ {{$txt.ForeignTable.NamePluralGo}} __ {{$txt.ForeignTable.NameHumanReadable}} __ {{$txt.ForeignTable.ColumnNameGo}} */}}
+
+
+
