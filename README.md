@@ -5,6 +5,9 @@
 
 ```bash
 go get -u https://github.com/saulortega/restsqlboiler
-restsqlboiler -d /path/to/sqlboiler/models
+restsqlboiler
+
+// Then generate the SQLBoiler models:
+go generate
 ```
 

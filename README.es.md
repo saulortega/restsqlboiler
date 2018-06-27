@@ -10,7 +10,7 @@ Esta herramienta extiende la funcionalidad de [SQLBoiler](https://github.com/vol
 
 #### ¿Cómo funciona?
 
-RESTSQLBoiler lee e interpreta los archivos generados por SQLBoiler y genera nuevos archivos con nuevas funciones que extienden la funcionalidad de SQLBoiler.
+RESTSQLBoiler agrega nuevas plantillas con nuevas funciones que extienden la funcionalidad de SQLBoiler.
 
 
 #### ¿Cómo se usa?
@@ -43,14 +43,17 @@ Las funciones anteriores responden automáticamente la solicitud.
 
 ```bash
 go get -u https://github.com/saulortega/restsqlboiler
-restsqlboiler -d /ruta/a/sqlboiler/models
+restsqlboiler
+
+// Una vez ejecutado, se deben generar los modelos de SQLBoiler, de la manera usual:
+go generate
 ```
 
 #### Restricciones a tener en cuenta:
 
 - Aún en desarrollo.
 - Probado únicamente con Postgres.
-- La llave primaria de las tablas debe ser de tipo `bigserial` (más precisamente, `int64` en Go) y debe llamarse `id`.
+- La llave primaria de las tablas debe ser de tipo `bigint` o `bigserial` (más precisamente, `int64` en Go) y debe llamarse `id`.
 - Aún se requiere el llamado manual de las funciones, por lo que el usuario debe manejar el receptor http y desde allí llamar las funciones de RESTSQLBoiler.
 
 
