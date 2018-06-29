@@ -1,8 +1,17 @@
 
 
 
-/*
+{{- $model := .Aliases.Table .Table.Name -}}
+{{- $hasDeletedAt := setInclude "deleted_at" (columnNames .Table.Columns) -}}
 
+
+
+
+// ---------- hasta aquí las variables nuevas definitivas ----------------
+
+
+
+/*
 
 --------- ANTES:::
 
@@ -26,14 +35,10 @@ type {{$modelNameCamel}}R struct {
 //
 }
 
-// ---
-
-*/}}
 
 ----------- DESPUES:::
 
 
-{{/*
 
 {{- $alias := .Aliases.Table .Table.Name -}}
 // {{$alias.DownSingular}}R is where relationships are stored.
@@ -58,13 +63,8 @@ type {{$alias.DownSingular}}R struct {
 	//
 }
 
-// --
 
-*/}}
-
-
-
-{{/*
+---------------------------------------------------
 
 MAS SIMPÑLIFICADO::::::
 
@@ -87,60 +87,49 @@ DESPUES:::
 
 */}}
 
-
-
 */
-
-
-
-// --------------------- hasta aquí, pruebas  ---------------------------
 
 
 
 
 // ---------------------------------------------------------
 
-{{- $dot := . -}}
-{{- $modelName := .Table.Name | singular | titleCase -}}
-{{- $modelNamePlural := .Table.Name | plural | titleCase -}}
-{{- $varNameSingular := .Table.Name | singular | camelCase -}}
-{{- $alias := .Aliases.Table .Table.Name -}}  {{/*                  -------------- esta reemplazará a algunas de las anteriors ----------------- */}}
 
-var OmitFieldsOnBuilding{{$modelName}} = []string{}
+var OmitFieldsOnBuilding{{$model.UpSingular}} = []string{}
 
-var Validate{{$modelName}} = func(boil.Executor, *{{$modelName}}) error {
+var Validate{{$model.UpSingular}} = func(boil.Executor, *{{$model.UpSingular}}) error {
 	return nil
 }
 
-var Validate{{$modelName}}OnUpdate = func(boil.Executor, *{{$modelName}}) error {
+var Validate{{$model.UpSingular}}OnUpdate = func(boil.Executor, *{{$model.UpSingular}}) error {
 	return nil
 }
 
-var Validate{{$modelName}}OnInsert = func(boil.Executor, *{{$modelName}}) error {
+var Validate{{$model.UpSingular}}OnInsert = func(boil.Executor, *{{$model.UpSingular}}) error {
 	return nil
 }
 
-var Build{{$modelName}} = func(boil.Executor, *{{$modelName}}, *http.Request) error {
+var Build{{$model.UpSingular}} = func(boil.Executor, *{{$model.UpSingular}}, *http.Request) error {
 	return nil
 }
 
-var Build{{$modelName}}OnUpdate = func(boil.Executor, *{{$modelName}}, *http.Request) error {
+var Build{{$model.UpSingular}}OnUpdate = func(boil.Executor, *{{$model.UpSingular}}, *http.Request) error {
 	return nil
 }
 
-var Build{{$modelName}}OnInsert = func(boil.Executor, *{{$modelName}}, *http.Request) error {
+var Build{{$model.UpSingular}}OnInsert = func(boil.Executor, *{{$model.UpSingular}}, *http.Request) error {
 	return nil
 }
 
-var AfterUpdate{{$modelName}} = func(boil.Transactor, *{{$modelName}}, *http.Request) error {
+var AfterUpdate{{$model.UpSingular}} = func(boil.Transactor, *{{$model.UpSingular}}, *http.Request) error {
 	return nil
 }
 
-var AfterInsert{{$modelName}} = func(boil.Transactor, *{{$modelName}}, *http.Request) error {
+var AfterInsert{{$model.UpSingular}} = func(boil.Transactor, *{{$model.UpSingular}}, *http.Request) error {
 	return nil
 }
 
-var Rebuild{{$modelName}}OnFind = func(exec boil.Executor, Obj *{{$modelName}}) (interface{}, error) {
+var Rebuild{{$model.UpSingular}}OnFind = func(exec boil.Executor, Obj *{{$model.UpSingular}}) (interface{}, error) {
 	return interface{}(Obj), nil
 }
 
@@ -155,11 +144,9 @@ var Rebuild{{$modelName}}OnFind = func(exec boil.Executor, Obj *{{$modelName}}) 
 
 
 
-{{- $modelName := .Table.Name | singular | titleCase -}}
-
-// FindAndResponse{{$modelName}} retrieves and write to http.ResponseWriter a single record by ID obtained from Request URL.
-func FindAndResponse{{$modelName}}(exec boil.Executor, w http.ResponseWriter, r *http.Request) {
-	var obj = new({{$modelName}})
+// FindAndResponse{{$model.UpSingular}} retrieves and write to http.ResponseWriter a single record by ID obtained from Request URL.
+func FindAndResponse{{$model.UpSingular}}(exec boil.Executor, w http.ResponseWriter, r *http.Request) {
+	var obj = new({{$model.UpSingular}})
 	var Obj interface{}
 	var err error
 	var id int64
@@ -170,13 +157,13 @@ func FindAndResponse{{$modelName}}(exec boil.Executor, w http.ResponseWriter, r 
 		return
 	}
 
-	obj, err = Find{{$modelName}}(exec, id)
+	obj, err = Find{{$model.UpSingular}}(exec, id)
 	if err != nil {
 		ResponseFindError(w, id, err)
 		return
 	}
 
-	Obj, err = Rebuild{{$modelName}}OnFind(exec, obj)
+	Obj, err = Rebuild{{$model.UpSingular}}OnFind(exec, obj)
 	if err != nil {
 		ResponseFindError(w, id, err)
 		return
@@ -186,10 +173,9 @@ func FindAndResponse{{$modelName}}(exec boil.Executor, w http.ResponseWriter, r 
 }
 
 
-{{$modelName := .Table.Name | singular | titleCase -}}
 
-func InsertAndResponse{{$modelName}}(exec boil.Executor, w http.ResponseWriter, r *http.Request) {
-	var Obj = new({{$modelName}})
+func InsertAndResponse{{$model.UpSingular}}(exec boil.Executor, w http.ResponseWriter, r *http.Request) {
+	var Obj = new({{$model.UpSingular}})
 	var TX = new(sql.Tx)
 	var err error
 
@@ -199,19 +185,19 @@ func InsertAndResponse{{$modelName}}(exec boil.Executor, w http.ResponseWriter, 
 		return
 	}
 
-	err = Build{{$modelName}}OnInsert(exec, Obj, r)
+	err = Build{{$model.UpSingular}}OnInsert(exec, Obj, r)
 	if err != nil {
 		ResponseBadRequest(w, err)
 		return
 	}
 
-	err = Validate{{$modelName}}(exec, Obj)
+	err = Validate{{$model.UpSingular}}(exec, Obj)
 	if err != nil {
 		ResponseBadRequest(w, err)
 		return
 	}
 
-	err = Validate{{$modelName}}OnInsert(exec, Obj)
+	err = Validate{{$model.UpSingular}}OnInsert(exec, Obj)
 	if err != nil {
 		ResponseBadRequest(w, err)
 		return
@@ -230,7 +216,7 @@ func InsertAndResponse{{$modelName}}(exec boil.Executor, w http.ResponseWriter, 
 		return
 	}
 
-	err = AfterInsert{{$modelName}}(TX, Obj, r)
+	err = AfterInsert{{$model.UpSingular}}(TX, Obj, r)
 	if err != nil {
 		ResponseInternalServerError(w, err, "9172")
 		TX.Rollback()
@@ -248,10 +234,9 @@ func InsertAndResponse{{$modelName}}(exec boil.Executor, w http.ResponseWriter, 
 }
 
 
-{{$modelName := .Table.Name | singular | titleCase -}}
 
-func UpdateAndResponse{{$modelName}}(exec boil.Executor, w http.ResponseWriter, r *http.Request) {
-	var Obj = new({{$modelName}})
+func UpdateAndResponse{{$model.UpSingular}}(exec boil.Executor, w http.ResponseWriter, r *http.Request) {
+	var Obj = new({{$model.UpSingular}})
 	var TX = new(sql.Tx)
 	var err error
 	var id int64
@@ -262,7 +247,7 @@ func UpdateAndResponse{{$modelName}}(exec boil.Executor, w http.ResponseWriter, 
 		return
 	}
 
-	Obj, err = Find{{$modelName}}(exec, id)
+	Obj, err = Find{{$model.UpSingular}}(exec, id)
 	if err != nil {
 		ResponseFindError(w, id, err)
 		return
@@ -274,19 +259,19 @@ func UpdateAndResponse{{$modelName}}(exec boil.Executor, w http.ResponseWriter, 
 		return
 	}
 
-	err = Build{{$modelName}}OnUpdate(exec, Obj, r)
+	err = Build{{$model.UpSingular}}OnUpdate(exec, Obj, r)
 	if err != nil {
 		ResponseBadRequest(w, err)
 		return
 	}
 
-	err = Validate{{$modelName}}(exec, Obj)
+	err = Validate{{$model.UpSingular}}(exec, Obj)
 	if err != nil {
 		ResponseBadRequest(w, err)
 		return
 	}
 
-	err = Validate{{$modelName}}OnUpdate(exec, Obj)
+	err = Validate{{$model.UpSingular}}OnUpdate(exec, Obj)
 	if err != nil {
 		ResponseBadRequest(w, err)
 		return
@@ -305,7 +290,7 @@ func UpdateAndResponse{{$modelName}}(exec boil.Executor, w http.ResponseWriter, 
 		return
 	}
 
-	err = AfterUpdate{{$modelName}}(TX, Obj, r)
+	err = AfterUpdate{{$model.UpSingular}}(TX, Obj, r)
 	if err != nil {
 		ResponseInternalServerError(w, err, "3076")
 		TX.Rollback()
@@ -322,25 +307,17 @@ func UpdateAndResponse{{$modelName}}(exec boil.Executor, w http.ResponseWriter, 
 	w.WriteHeader(http.StatusOK)
 }
 
-
-
-
-
-{{$modelName := .Table.Name | singular | titleCase -}}
-{{- $hasDeletedAt := setInclude "deleted_at" (columnNames .Table.Columns) -}}
-{{- $varNameSingular := .Table.Name | singular | camelCase -}}
-
-func DeleteAndResponse{{$modelName}}(exec boil.Executor, w http.ResponseWriter, r *http.Request) {
+func DeleteAndResponse{{$model.UpSingular}}(exec boil.Executor, w http.ResponseWriter, r *http.Request) {
 	{{if $hasDeletedAt -}}
-		SoftDeleteAndResponse{{$modelName}}(exec, w, r)
+		SoftDeleteAndResponse{{$model.UpSingular}}(exec, w, r)
 	{{- else -}}
-		HardDeleteAndResponse{{$modelName}}(exec, w, r)
+		HardDeleteAndResponse{{$model.UpSingular}}(exec, w, r)
 	{{- end -}}
 }
 
 {{if $hasDeletedAt -}}
-func SoftDeleteAndResponse{{$modelName}}(exec boil.Executor, w http.ResponseWriter, r *http.Request) {
-	var Obj = new({{$modelName}})
+func SoftDeleteAndResponse{{$model.UpSingular}}(exec boil.Executor, w http.ResponseWriter, r *http.Request) {
+	var Obj = new({{$model.UpSingular}})
 	var err error
 	var id int64
 
@@ -350,7 +327,7 @@ func SoftDeleteAndResponse{{$modelName}}(exec boil.Executor, w http.ResponseWrit
 		return
 	}
 
-	Obj, err = Find{{$modelName}}(exec, id)
+	Obj, err = Find{{$model.UpSingular}}(exec, id)
 	if err != nil {
 		ResponseFindError(w, id, err)
 		return
@@ -368,8 +345,8 @@ func SoftDeleteAndResponse{{$modelName}}(exec boil.Executor, w http.ResponseWrit
 }
 {{- end}}
 
-func HardDeleteAndResponse{{$modelName}}(exec boil.Executor, w http.ResponseWriter, r *http.Request) {
-	var Obj = new({{$modelName}})
+func HardDeleteAndResponse{{$model.UpSingular}}(exec boil.Executor, w http.ResponseWriter, r *http.Request) {
+	var Obj = new({{$model.UpSingular}})
 	var err error
 	var id int64
 
@@ -379,7 +356,7 @@ func HardDeleteAndResponse{{$modelName}}(exec boil.Executor, w http.ResponseWrit
 		return
 	}
 
-	Obj, err = Find{{$modelName}}(exec, id)
+	Obj, err = Find{{$model.UpSingular}}(exec, id)
 	if err != nil {
 		ResponseFindError(w, id, err)
 		return
@@ -401,86 +378,86 @@ func HardDeleteAndResponse{{$modelName}}(exec boil.Executor, w http.ResponseWrit
 //
 
 
-func (o *{{$modelName}}) BuildFromForm(exec boil.Executor, r *http.Request) error {
+func (o *{{$model.UpSingular}}) BuildFromForm(exec boil.Executor, r *http.Request) error {
 	var err error
 
 	{{range $column := .Table.Columns }}
 	{{- if eq (titleCase $column.Name) "ID" "CreatedAt" "UpdatedAt" "DeletedAt"}}
 	{{- else -}}
 	{{- if eq $column.Type "string" -}}
-	if !in("{{$column.Name}}", OmitFieldsOnBuilding{{$modelName}}){
-		o.{{titleCase $column.Name}} = r.FormValue("{{if eq $dot.StructTagCasing "camel"}}{{$column.Name | camelCase}}{{else}}{{$column.Name}}{{end}}")
+	if !in("{{$column.Name}}", OmitFieldsOnBuilding{{$model.UpSingular}}){
+		o.{{titleCase $column.Name}} = r.FormValue("{{if eq $.StructTagCasing "camel"}}{{$column.Name | camelCase}}{{else}}{{$column.Name}}{{end}}")
 	}
 	{{else if eq $column.Type "bool" -}}
-	if !in("{{$column.Name}}", OmitFieldsOnBuilding{{$modelName}}){
-		o.{{titleCase $column.Name}}, err = parseBoolFromForm(r, "{{if eq $dot.StructTagCasing "camel"}}{{$column.Name | camelCase}}{{else}}{{$column.Name}}{{end}}", !in("{{$column.Name}}", {{$varNameSingular}}ColumnsWithDefault))
+	if !in("{{$column.Name}}", OmitFieldsOnBuilding{{$model.UpSingular}}){
+		o.{{titleCase $column.Name}}, err = parseBoolFromForm(r, "{{if eq $.StructTagCasing "camel"}}{{$column.Name | camelCase}}{{else}}{{$column.Name}}{{end}}", !in("{{$column.Name}}", {{$model.DownSingular}}ColumnsWithDefault))
 		if err != nil {
 			return err
 		}
 	}
 	{{else if eq $column.Type "int" -}}
-	if !in("{{$column.Name}}", OmitFieldsOnBuilding{{$modelName}}){
-		o.{{titleCase $column.Name}}, err = parseIntFromForm(r, "{{if eq $dot.StructTagCasing "camel"}}{{$column.Name | camelCase}}{{else}}{{$column.Name}}{{end}}", !in("{{$column.Name}}", {{$varNameSingular}}ColumnsWithDefault))
+	if !in("{{$column.Name}}", OmitFieldsOnBuilding{{$model.UpSingular}}){
+		o.{{titleCase $column.Name}}, err = parseIntFromForm(r, "{{if eq $.StructTagCasing "camel"}}{{$column.Name | camelCase}}{{else}}{{$column.Name}}{{end}}", !in("{{$column.Name}}", {{$model.DownSingular}}ColumnsWithDefault))
 		if err != nil {
 			return err
 		}
 	}
 	{{else if eq $column.Type "int64" -}}
-	if !in("{{$column.Name}}", OmitFieldsOnBuilding{{$modelName}}){
-		o.{{titleCase $column.Name}}, err = parseInt64FromForm(r, "{{if eq $dot.StructTagCasing "camel"}}{{$column.Name | camelCase}}{{else}}{{$column.Name}}{{end}}", !in("{{$column.Name}}", {{$varNameSingular}}ColumnsWithDefault))
+	if !in("{{$column.Name}}", OmitFieldsOnBuilding{{$model.UpSingular}}){
+		o.{{titleCase $column.Name}}, err = parseInt64FromForm(r, "{{if eq $.StructTagCasing "camel"}}{{$column.Name | camelCase}}{{else}}{{$column.Name}}{{end}}", !in("{{$column.Name}}", {{$model.DownSingular}}ColumnsWithDefault))
 		if err != nil {
 			return err
 		}
 	}
 	{{else if eq $column.Type "float64" -}}
-	if !in("{{$column.Name}}", OmitFieldsOnBuilding{{$modelName}}){
-		o.{{titleCase $column.Name}}, err = parseFloat64FromForm(r, "{{if eq $dot.StructTagCasing "camel"}}{{$column.Name | camelCase}}{{else}}{{$column.Name}}{{end}}", !in("{{$column.Name}}", {{$varNameSingular}}ColumnsWithDefault))
+	if !in("{{$column.Name}}", OmitFieldsOnBuilding{{$model.UpSingular}}){
+		o.{{titleCase $column.Name}}, err = parseFloat64FromForm(r, "{{if eq $.StructTagCasing "camel"}}{{$column.Name | camelCase}}{{else}}{{$column.Name}}{{end}}", !in("{{$column.Name}}", {{$model.DownSingular}}ColumnsWithDefault))
 		if err != nil {
 			return err
 		}
 	}
 	{{else if eq $column.Type "time.Time" -}}
-	if !in("{{$column.Name}}", OmitFieldsOnBuilding{{$modelName}}){
-		o.{{titleCase $column.Name}}, err = parseTimeFromForm(r, "{{if eq $dot.StructTagCasing "camel"}}{{$column.Name | camelCase}}{{else}}{{$column.Name}}{{end}}", !in("{{$column.Name}}", {{$varNameSingular}}ColumnsWithDefault))
+	if !in("{{$column.Name}}", OmitFieldsOnBuilding{{$model.UpSingular}}){
+		o.{{titleCase $column.Name}}, err = parseTimeFromForm(r, "{{if eq $.StructTagCasing "camel"}}{{$column.Name | camelCase}}{{else}}{{$column.Name}}{{end}}", !in("{{$column.Name}}", {{$model.DownSingular}}ColumnsWithDefault))
 		if err != nil {
 			return err
 		}
 	}
 	{{else if eq $column.Type "null.String" -}}
-	if !in("{{$column.Name}}", OmitFieldsOnBuilding{{$modelName}}){
-		o.{{titleCase $column.Name}} = parseNullStringFromForm(r, "{{if eq $dot.StructTagCasing "camel"}}{{$column.Name | camelCase}}{{else}}{{$column.Name}}{{end}}")
+	if !in("{{$column.Name}}", OmitFieldsOnBuilding{{$model.UpSingular}}){
+		o.{{titleCase $column.Name}} = parseNullStringFromForm(r, "{{if eq $.StructTagCasing "camel"}}{{$column.Name | camelCase}}{{else}}{{$column.Name}}{{end}}")
 	}
 	{{else if eq $column.Type "null.Bool" -}}
-	if !in("{{$column.Name}}", OmitFieldsOnBuilding{{$modelName}}){
-		o.{{titleCase $column.Name}}, err = parseNullBoolFromForm(r, "{{if eq $dot.StructTagCasing "camel"}}{{$column.Name | camelCase}}{{else}}{{$column.Name}}{{end}}")
+	if !in("{{$column.Name}}", OmitFieldsOnBuilding{{$model.UpSingular}}){
+		o.{{titleCase $column.Name}}, err = parseNullBoolFromForm(r, "{{if eq $.StructTagCasing "camel"}}{{$column.Name | camelCase}}{{else}}{{$column.Name}}{{end}}")
 		if err != nil {
 			return err
 		}
 	}
 	{{else if eq $column.Type "null.Int" -}}
-	if !in("{{$column.Name}}", OmitFieldsOnBuilding{{$modelName}}){
-		o.{{titleCase $column.Name}}, err = parseNullIntFromForm(r, "{{if eq $dot.StructTagCasing "camel"}}{{$column.Name | camelCase}}{{else}}{{$column.Name}}{{end}}")
+	if !in("{{$column.Name}}", OmitFieldsOnBuilding{{$model.UpSingular}}){
+		o.{{titleCase $column.Name}}, err = parseNullIntFromForm(r, "{{if eq $.StructTagCasing "camel"}}{{$column.Name | camelCase}}{{else}}{{$column.Name}}{{end}}")
 		if err != nil {
 			return err
 		}
 	}
 	{{else if eq $column.Type "null.Int64" -}}
-	if !in("{{$column.Name}}", OmitFieldsOnBuilding{{$modelName}}){
-		o.{{titleCase $column.Name}}, err = parseNullInt64FromForm(r, "{{if eq $dot.StructTagCasing "camel"}}{{$column.Name | camelCase}}{{else}}{{$column.Name}}{{end}}")
+	if !in("{{$column.Name}}", OmitFieldsOnBuilding{{$model.UpSingular}}){
+		o.{{titleCase $column.Name}}, err = parseNullInt64FromForm(r, "{{if eq $.StructTagCasing "camel"}}{{$column.Name | camelCase}}{{else}}{{$column.Name}}{{end}}")
 		if err != nil {
 			return err
 		}
 	}
 	{{else if eq $column.Type "null.Float64" -}}
-	if !in("{{$column.Name}}", OmitFieldsOnBuilding{{$modelName}}){
-		o.{{titleCase $column.Name}}, err = parseNullFloat64FromForm(r, "{{if eq $dot.StructTagCasing "camel"}}{{$column.Name | camelCase}}{{else}}{{$column.Name}}{{end}}")
+	if !in("{{$column.Name}}", OmitFieldsOnBuilding{{$model.UpSingular}}){
+		o.{{titleCase $column.Name}}, err = parseNullFloat64FromForm(r, "{{if eq $.StructTagCasing "camel"}}{{$column.Name | camelCase}}{{else}}{{$column.Name}}{{end}}")
 		if err != nil {
 			return err
 		}
 	}
 	{{else if eq $column.Type "null.Time" -}}
-	if !in("{{$column.Name}}", OmitFieldsOnBuilding{{$modelName}}){
-		o.{{titleCase $column.Name}}, err = parseNullTimeFromForm(r, "{{if eq $dot.StructTagCasing "camel"}}{{$column.Name | camelCase}}{{else}}{{$column.Name}}{{end}}")
+	if !in("{{$column.Name}}", OmitFieldsOnBuilding{{$model.UpSingular}}){
+		o.{{titleCase $column.Name}}, err = parseNullTimeFromForm(r, "{{if eq $.StructTagCasing "camel"}}{{$column.Name | camelCase}}{{else}}{{$column.Name}}{{end}}")
 		if err != nil {
 			return err
 		}
@@ -494,46 +471,16 @@ func (o *{{$modelName}}) BuildFromForm(exec boil.Executor, r *http.Request) erro
 		return err
 	}
 
-	return Build{{$modelName}}(exec, o, r)
+	return Build{{$model.UpSingular}}(exec, o, r)
 }
 
 
 
 {{range .Table.FKeys -}}
-{{/* {{- $txt := txtsFromFKey $dot.Tables $dot.Table . -}}  ------------- quitar esto ------------- */}}
 
-
-
-// ------ pruebas -----
-
-
-{{- $ftable := $.Aliases.Table .ForeignTable -}}
-{{- $relAlias := $alias.Relationship .Name -}}
-
-// $ftable =============:: {{$ftable}}
-// $relAlias =============:: {{$relAlias}}
-
-
-{{/*
-
-antes::::::::::::::::::
-
-{{- $txt := txtsFromFKey $dot.Tables $dot.Table . -}}
-{{$txt.Function.Name}} *{{$txt.ForeignTable.NameGo}}
-
-despues ::::::::::::::::::::
-
-{{- $ftable := $.Aliases.Table .ForeignTable -}}
-{{- $relAlias := $alias.Relationship .Name -}}
-{{$relAlias.Foreign}} *{{$ftable.UpSingular}}
-
-
-
-
-
-func Build{{$modelNamePlural}}With{{$txt.LocalTable.ColumnNameGo}}sFromPostForm(r *http.Request, keys ...string) ([]*{{$modelName}}, error) {
-	var objs = []*{{$modelName}}{}
-	var key = "{{$txt.ForeignKey.Column}}"
+func Build{{$model.UpPlural}}With{{titleCase .Column}}sFromPostForm(r *http.Request, keys ...string) ([]*{{$model.UpSingular}}, error) {
+	var objs = []*{{$model.UpSingular}}{}
+	var key = "{{.Column}}"
 	if len(keys) > 0 {
 		key = keys[0]
 	}
@@ -547,31 +494,25 @@ func Build{{$modelNamePlural}}With{{$txt.LocalTable.ColumnNameGo}}sFromPostForm(
 		return objs, err
 	}
 
-	objs = Build{{$modelNamePlural}}With{{$txt.LocalTable.ColumnNameGo}}s(ids)
+	objs = Build{{$model.UpPlural}}With{{titleCase .Column}}s(ids)
 
 	return objs, nil
 }
 
-
-func Build{{$modelNamePlural}}With{{$txt.LocalTable.ColumnNameGo}}s(ids []{{if .Nullable}}null.Int64{{else}}int64{{end}}) []*{{$modelName}} {
-	var objs = []*{{$modelName}}{}
+func Build{{$model.UpPlural}}With{{titleCase .Column}}s(ids []{{if .Nullable}}null.Int64{{else}}int64{{end}}) []*{{$model.UpSingular}} {
+	var objs = []*{{$model.UpSingular}}{}
 
 	for _, id := range ids {
-		obj := new({{$modelName}})
-		obj.{{$txt.LocalTable.ColumnNameGo}} = id
+		obj := new({{$model.UpSingular}})
+		obj.{{titleCase .Column}} = id
 		objs = append(objs, obj)
 	}
 
 	return objs
 }
 
-*/}}
-
 {{end}}
 
-
-
-// ////////////////// -------------- pendiente borrar lo que no sea 70 y 000 -------------------------
 
 
 
@@ -589,7 +530,7 @@ func Build{{$modelNamePlural}}With{{$txt.LocalTable.ColumnNameGo}}s(ids []{{if .
 
 <template>
 
-	<div class="modal fade modal-xs" id="Modal{{$modelName}}" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
+	<div class="modal fade modal-xs" id="Modal{{$model.UpSingular}}" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
 		<div class="modal-dialog">
 			<div class="modal-content">
 
@@ -597,13 +538,13 @@ func Build{{$modelNamePlural}}With{{$txt.LocalTable.ColumnNameGo}}s(ids []{{if .
 					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">
 						&times;
 					</button>
-					<h4 v-if="id"><strong>Editing {{$modelName}} <em>«{{`{{ id }}`}}»</em></strong></h4>
-					<h4 v-else>Create new {{$modelName}}</h4>
+					<h4 v-if="id"><strong>Editing {{$model.UpSingular}} <em>«{{`{{ id }}`}}»</em></strong></h4>
+					<h4 v-else>Create new {{$model.UpSingular}}</h4>
 				</div>
 
 				<div class="modal-body">
 					<child
-					ref="{{$modelName}}"
+					ref="{{$model.UpSingular}}"
 					@get="onGet"
 					@edit="onEdit"
 					@create="onCreate"
@@ -624,10 +565,10 @@ func Build{{$modelNamePlural}}With{{$txt.LocalTable.ColumnNameGo}}s(ids []{{if .
 						Cancel
 					</button>
 					<button type="button" class="btn btn-primary" v-if="!id" v-on:click="create" :disabled="creating">
-						Create {{$modelName}}
+						Create {{$model.UpSingular}}
 					</button>
 					<button type="button" class="btn btn-primary" v-if="id" v-on:click="edit" :disabled="editing">
-						Save {{$modelName}}
+						Save {{$model.UpSingular}}
 					</button>
 				</div>
 
@@ -658,33 +599,33 @@ func Build{{$modelNamePlural}}With{{$txt.LocalTable.ColumnNameGo}}s(ids []{{if .
 		},
 		methods: {
 			new: function(){
-				this.$refs.{{$modelName}}.clean()
-				$('#Modal{{$modelName}}').modal('show')
+				this.$refs.{{$model.UpSingular}}.clean()
+				$('#Modal{{$model.UpSingular}}').modal('show')
 			},
 			get: function(id){
-				this.$refs.{{$modelName}}.get(id)
+				this.$refs.{{$model.UpSingular}}.get(id)
 			},
 			edit: function(){
-				this.$refs.{{$modelName}}.edit()
+				this.$refs.{{$model.UpSingular}}.edit()
 			},
 			create: function(){
-				this.$refs.{{$modelName}}.create()
+				this.$refs.{{$model.UpSingular}}.create()
 			},
 			onGet: function(ok, data){
 				if(ok){
-					$('#Modal{{$modelName}}').modal('show')
+					$('#Modal{{$model.UpSingular}}').modal('show')
 				}
 				this.$emit('get', ok, data)
 			},
 			onEdit: function(ok, data){
 				if(ok){
-					$('#Modal{{$modelName}}').modal('hide')
+					$('#Modal{{$model.UpSingular}}').modal('hide')
 				}
 				this.$emit('edit', ok, data)
 			},
 			onCreate: function(ok, data){
 				if(ok){
-					$('#Modal{{$modelName}}').modal('hide')
+					$('#Modal{{$model.UpSingular}}').modal('hide')
 				}
 				this.$emit('create', ok, data)
 			},
@@ -738,7 +679,7 @@ func Build{{$modelNamePlural}}With{{$txt.LocalTable.ColumnNameGo}}s(ids []{{if .
 		data: function () {
 			return {}
 		},
-		mixins: [Mixin{{$modelName}}],
+		mixins: [Mixin{{$model.UpSingular}}],
 		mounted: function(){
 			//
 		},
@@ -754,4 +695,3 @@ func Build{{$modelNamePlural}}With{{$txt.LocalTable.ColumnNameGo}}s(ids []{{if .
 
 */
 
-{{/* {{$txt.ForeignTable.Slice}} __ {{$txt.ForeignTable.NameGo}} __ {{$txt.ForeignTable.NamePluralGo}} __ {{$txt.ForeignTable.NameHumanReadable}} __ {{$txt.ForeignTable.ColumnNameGo}} */}}

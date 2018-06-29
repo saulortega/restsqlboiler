@@ -1,7 +1,7 @@
-{{- $alias := .Aliases.Table .Table.Name -}}
+{{- $model := .Aliases.Table .Table.Name -}}
 
 
-var Mixin{{$alias.UpSingular}} = {
+var Mixin{{$model.UpSingular}} = {
 	data: function () {
 		return {
 			//Resource: '/{{.Table.Name}}',
@@ -55,7 +55,7 @@ var Mixin{{$alias.UpSingular}} = {
 		get: function(id) {
 			this.clean()
 			this.getting = true
-			{{$alias.UpSingular}}.Get(id).then( res => {
+			{{$model.UpSingular}}.Get(id).then( res => {
 				console.log('get vue ', res)
 				this.Data = res.data
 				this.getting = false
@@ -67,7 +67,7 @@ var Mixin{{$alias.UpSingular}} = {
 		},
 		edit: function() {
 			this.editing = true
-			{{$alias.UpSingular}}.Edit(this.Data.id, this.Data).then( res => {
+			{{$model.UpSingular}}.Edit(this.Data.id, this.Data).then( res => {
 				console.log('edit vue ', res)
 				this.editing = false
 				this.$emit('edit', true, JSON.parse(JSON.stringify(this.Data)))
@@ -78,7 +78,7 @@ var Mixin{{$alias.UpSingular}} = {
 		},
 		create: function() {
 			this.creating = true
-			{{$alias.UpSingular}}.Create(this.Data).then( res => {
+			{{$model.UpSingular}}.Create(this.Data).then( res => {
 				console.log('create vue ', res)
 				this.creating = false
 				this.Data.id = (res.headers['X-Id'] || res.headers['x-id'] || this.Data.id || '')
@@ -90,7 +90,7 @@ var Mixin{{$alias.UpSingular}} = {
 		},
 		delete: function() {
 			this.deleting = true
-			{{$alias.UpSingular}}.Delete(this.Data.id).then( res => {
+			{{$model.UpSingular}}.Delete(this.Data.id).then( res => {
 				console.log('delete vue ', res)
 				this.deleting = false
 				this.$emit('delete', true, JSON.parse(JSON.stringify(this.Data)))
@@ -158,6 +158,6 @@ var Mixin{{$alias.UpSingular}} = {
 
 
 
-var Mixin{{$alias.UpPlural}} = {
+var Mixin{{$model.UpPlural}} = {
 	// -------- quizás no...
 }

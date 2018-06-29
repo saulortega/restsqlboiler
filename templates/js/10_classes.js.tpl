@@ -1,6 +1,4 @@
-{{/* {{- $dot := . -}} */}}
-{{- $alias := .Aliases.Table .Table.Name -}}
-
+{{- $model := .Aliases.Table .Table.Name -}}
 
 
 //headers: {
@@ -10,7 +8,7 @@
 
 
 
-class {{$alias.UpSingular}} {
+class {{$model.UpSingular}} {
 	constructor() {
 		this.Data = {
 			{{- range $column := .Table.Columns -}}
@@ -127,7 +125,7 @@ class {{$alias.UpSingular}} {
 	{{end}}
 }
 
-class {{$alias.UpPlural}} {
+class {{$model.UpPlural}} {
 	constructor() {
 		//
 	}
