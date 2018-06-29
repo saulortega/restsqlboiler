@@ -1,13 +1,5 @@
 {{- $model := .Aliases.Table .Table.Name -}}
 
-
-//headers: {
-//	'Accept': 'application/json',
-//	'Content-Type': 'multipart/form-data',
-//},
-
-
-
 class {{$model.UpSingular}} {
 	constructor() {
 		this.Data = {
@@ -18,7 +10,6 @@ class {{$model.UpSingular}} {
 			{{- end}}
 			{{- end}}
 		}
-		console.log('constructor..')
 
 		{{range .Table.FKeys -}}
 		{{- $ftable := $.Aliases.Table .ForeignTable -}}
@@ -27,7 +18,7 @@ class {{$model.UpSingular}} {
 
 		{{range .Table.ToManyRelationships -}}
 		{{- $ftable := $.Aliases.Table .ForeignTable -}}
-		this.{{$ftable.UpPlural}}
+		this.{{$ftable.UpPlural}} = []
 		{{end}}
 	}
 
@@ -36,22 +27,18 @@ class {{$model.UpSingular}} {
 	}
 
 	static Get(id) {
-		//return HttpRequest.Get(`${this.Source}/${id}`)
 		return axios.get(`${this.Source}/${id}`)
 	}
 
 	static Create(data) {
-		//return HttpRequest.Post(this.Source, data)
 		return axios.post(this.Source, data)
 	}
 
 	static Edit(id, data) {
-		//return HttpRequest.Put(`${this.Source}/${id}`, data)
 		return axios.put(`${this.Source}/${id}`, data)
 	}
 
 	static Delete(id) {
-		//return HttpRequest.Delete(`${this.Source}/${id}`)
 		return axios.delete(`${this.Source}/${id}`)
 	}
 
@@ -71,7 +58,7 @@ class {{$model.UpSingular}} {
 
 			{{$ftable.UpSingular}}.Get(this.Data.{{.Column}}).then( res => {
 				console.log('resssssssssss sing ', res)
-				this.{{$ftable.UpSingular}} = res.data
+				this.{{$ftable.UpSingular}} = res.data || {}
 				resolve(res)
 			}).catch( res => {
 				reject(res)
@@ -103,7 +90,7 @@ class {{$model.UpSingular}} {
 
 			{{$ftable.UpPlural}}.Get({'{{.ForeignColumn}}': this.Data.id}).then( res => {
 				console.log('resssssssssss plur ', res)
-				this.{{$ftable.UpPlural}} = res.data
+				this.{{$ftable.UpPlural}} = res.data || []
 				resolve(res)
 			}).catch( res => {
 				reject(res)

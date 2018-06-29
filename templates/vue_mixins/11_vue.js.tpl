@@ -1,6 +1,5 @@
 {{- $model := .Aliases.Table .Table.Name -}}
 
-
 var Mixin{{$model.UpSingular}} = {
 	data: function () {
 		return {
@@ -120,7 +119,7 @@ var Mixin{{$model.UpSingular}} = {
 
 				{{$ftable.UpSingular}}.Get(this.Data.{{.Column}}).then( res => {
 					console.log('resssssssssss sing vue ', res)
-					this.{{$ftable.UpSingular}} = res.data
+					this.{{$ftable.UpSingular}} = res.data || {}
 					resolve()
 				}).catch( res => {
 					reject()
@@ -145,7 +144,7 @@ var Mixin{{$model.UpSingular}} = {
 
 				{{$ftable.UpPlural}}.Get({'{{.ForeignColumn}}': this.Data.id}).then( res => {
 					console.log('resssssssssss plur vue ', res)
-					this.{{$ftable.UpPlural}} = res.data
+					this.{{$ftable.UpPlural}} = res.data || []
 					resolve()
 				}).catch( res => {
 					reject()

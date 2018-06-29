@@ -91,9 +91,9 @@ DESPUES:::
 
 
 
-
-// ---------------------------------------------------------
-
+//
+//
+//
 
 var OmitFieldsOnBuilding{{$model.UpSingular}} = []string{}
 
@@ -133,17 +133,6 @@ var Rebuild{{$model.UpSingular}}OnFind = func(exec boil.Executor, Obj *{{$model.
 	return interface{}(Obj), nil
 }
 
-
-//
-//
-//
-//
-//
-//
-
-
-
-
 // FindAndResponse{{$model.UpSingular}} retrieves and write to http.ResponseWriter a single record by ID obtained from Request URL.
 func FindAndResponse{{$model.UpSingular}}(exec boil.Executor, w http.ResponseWriter, r *http.Request) {
 	var obj = new({{$model.UpSingular}})
@@ -171,8 +160,6 @@ func FindAndResponse{{$model.UpSingular}}(exec boil.Executor, w http.ResponseWri
 
 	ResponseFindSuccess(w, id, Obj)
 }
-
-
 
 func InsertAndResponse{{$model.UpSingular}}(exec boil.Executor, w http.ResponseWriter, r *http.Request) {
 	var Obj = new({{$model.UpSingular}})
@@ -232,8 +219,6 @@ func InsertAndResponse{{$model.UpSingular}}(exec boil.Executor, w http.ResponseW
 	w.Header().Set("X-Id", fmt.Sprintf("%v", Obj.ID))
 	w.WriteHeader(http.StatusCreated)
 }
-
-
 
 func UpdateAndResponse{{$model.UpSingular}}(exec boil.Executor, w http.ResponseWriter, r *http.Request) {
 	var Obj = new({{$model.UpSingular}})
@@ -372,12 +357,6 @@ func HardDeleteAndResponse{{$model.UpSingular}}(exec boil.Executor, w http.Respo
 	w.WriteHeader(http.StatusOK)
 }
 
-
-//
-//
-//
-
-
 func (o *{{$model.UpSingular}}) BuildFromForm(exec boil.Executor, r *http.Request) error {
 	var err error
 
@@ -474,8 +453,6 @@ func (o *{{$model.UpSingular}}) BuildFromForm(exec boil.Executor, r *http.Reques
 	return Build{{$model.UpSingular}}(exec, o, r)
 }
 
-
-
 {{range .Table.FKeys -}}
 
 func Build{{$model.UpPlural}}With{{titleCase .Column}}sFromPostForm(r *http.Request, keys ...string) ([]*{{$model.UpSingular}}, error) {
@@ -521,124 +498,6 @@ func Build{{$model.UpPlural}}With{{titleCase .Column}}s(ids []{{if .Nullable}}nu
 /*
 
 
-//
-//
-// Empieza plantilla modal...
-//
-//
-
-
-<template>
-
-	<div class="modal fade modal-xs" id="Modal{{$model.UpSingular}}" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
-		<div class="modal-dialog">
-			<div class="modal-content">
-
-				<div class="modal-header">
-					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">
-						&times;
-					</button>
-					<h4 v-if="id"><strong>Editing {{$model.UpSingular}} <em>«{{`{{ id }}`}}»</em></strong></h4>
-					<h4 v-else>Create new {{$model.UpSingular}}</h4>
-				</div>
-
-				<div class="modal-body">
-					<child
-					ref="{{$model.UpSingular}}"
-					@get="onGet"
-					@edit="onEdit"
-					@create="onCreate"
-					@delete="onDelete"
-					@data-id="id = $event"
-					@getting="getting = $event"
-					@editing="editing = $event"
-					@creating="creating = $event"
-					@deleting="deleting = $event"></child>
-					<!--
-					@created="console.log('mmmmmm')" ==> componente, no el dato del hijo...
-					@mounted="console.log('mmmmmm')" ==> componente, no el dato del hijo...
-					-->
-				</div>
-
-				<div class="modal-footer">
-					<button type="button" class="btn btn-default" data-dismiss="modal">
-						Cancel
-					</button>
-					<button type="button" class="btn btn-primary" v-if="!id" v-on:click="create" :disabled="creating">
-						Create {{$model.UpSingular}}
-					</button>
-					<button type="button" class="btn btn-primary" v-if="id" v-on:click="edit" :disabled="editing">
-						Save {{$model.UpSingular}}
-					</button>
-				</div>
-
-			</div>
-		</div><!-- /.modal-dialog -->
-	</div>
-
-</template>
-
-
-
-<script>
-	var opcns = {
-		data: function () {
-			return {
-				id: '',
-				getting: false,
-				editing: false,
-				creating: false,
-				deleting: false,
-			}
-		},
-		components: {
-			'child': ObtnCpnt('{{.Table.Name | singular}}'),
-		},
-		mounted: function(){
-			//
-		},
-		methods: {
-			new: function(){
-				this.$refs.{{$model.UpSingular}}.clean()
-				$('#Modal{{$model.UpSingular}}').modal('show')
-			},
-			get: function(id){
-				this.$refs.{{$model.UpSingular}}.get(id)
-			},
-			edit: function(){
-				this.$refs.{{$model.UpSingular}}.edit()
-			},
-			create: function(){
-				this.$refs.{{$model.UpSingular}}.create()
-			},
-			onGet: function(ok, data){
-				if(ok){
-					$('#Modal{{$model.UpSingular}}').modal('show')
-				}
-				this.$emit('get', ok, data)
-			},
-			onEdit: function(ok, data){
-				if(ok){
-					$('#Modal{{$model.UpSingular}}').modal('hide')
-				}
-				this.$emit('edit', ok, data)
-			},
-			onCreate: function(ok, data){
-				if(ok){
-					$('#Modal{{$model.UpSingular}}').modal('hide')
-				}
-				this.$emit('create', ok, data)
-			},
-			onDelete: function(ok, data){
-				this.$emit('delete', ok, data)
-			},
-		},
-	}
-
-</script>
-
-
-
 
 
 //
@@ -646,7 +505,6 @@ func Build{{$model.UpPlural}}With{{titleCase .Column}}s(ids []{{if .Nullable}}nu
 // Empieza plantilla genérica vacía...
 //
 //
-
 
 
 <template>
